@@ -1,0 +1,47 @@
+--- ssl.conf.orig	2020-09-30 22:20:08.000000000 +0900
++++ ssl.conf	2021-12-08 13:49:28.764704904 +0900
+@@ -56,8 +56,8 @@
+ <VirtualHost _default_:443>
+ 
+ # General setup for the virtual host, inherited from global configuration
+-#DocumentRoot "/var/www/html"
+-#ServerName www.example.com:443
++DocumentRoot "/var/www/html"
++ServerName _:443
+ 
+ # Use separate log files for the SSL virtual host; note that LogLevel
+ # is not inherited from httpd.conf.
+@@ -72,7 +72,7 @@
+ #   SSL Protocol support:
+ # List the enable protocol levels with which clients will be able to
+ # connect.  Disable SSLv2 access by default:
+-SSLProtocol all -SSLv2 -SSLv3
++SSLProtocol All -SSLv2 -SSLv3 -TLSv1 -TLSv1.1
+ 
+ #   SSL Cipher Suite:
+ #   List the ciphers that the client is permitted to negotiate.
+@@ -203,9 +203,9 @@
+ #   Similarly, one has to force some clients to use HTTP/1.0 to workaround
+ #   their broken HTTP/1.1 implementation. Use variables "downgrade-1.0" and
+ #   "force-response-1.0" for this.
+-BrowserMatch "MSIE [2-5]" \
+-         nokeepalive ssl-unclean-shutdown \
+-         downgrade-1.0 force-response-1.0
++#BrowserMatch "MSIE [2-5]" \
++#         nokeepalive ssl-unclean-shutdown \
++#         downgrade-1.0 force-response-1.0
+ 
+ #   Per-Server Logging:
+ #   The home of a custom SSL log file. Use this when you want a
+@@ -213,5 +213,11 @@
+ CustomLog logs/ssl_request_log \
+           "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
+ 
++  <Directory "/var/www/html/">
++    Options None
++    AllowOverride None
++    Require all granted
++  </Directory>
++
+ </VirtualHost>                                  
+ 

@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  mailserver:
+    image: mailserver:latest
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: mailserver
+    volumes:
+      - home:/home
+    ports:
+      - "25:25"
+      - "80:80"
+      - "443:443"
+
+volumes:
+  home:
