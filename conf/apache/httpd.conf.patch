@@ -1,6 +1,6 @@
---- httpd.conf.orig	2020-09-30 22:20:08.000000000 +0900
-+++ httpd.conf	2021-12-08 13:53:44.486707847 +0900
-@@ -111,6 +111,11 @@
+--- httpd.conf.orig     2023-04-07 01:28:44.000000000 +0900
++++ httpd.conf  2023-05-14 23:09:45.022248003 +0900
+@@ -116,6 +116,11 @@
  # below.
  #
  
@@ -12,7 +12,7 @@
  #
  # DocumentRoot: The directory out of which you will serve your
  # documents. By default, all requests are taken from this directory, but
-@@ -141,7 +146,7 @@
+@@ -146,7 +151,7 @@
      # http://httpd.apache.org/docs/2.4/mod/core.html#options
      # for more information.
      #
@@ -21,7 +21,25 @@
  
      #
      # AllowOverride controls what directives may be placed in .htaccess files.
-@@ -345,7 +350,12 @@
+@@ -184,7 +189,7 @@
+ # logged here.  If you *do* define an error logfile for a <VirtualHost>
+ # container, that host's errors will be logged there and not here.
+ #
+-ErrorLog "logs/error_log"
++ErrorLog "/dev/stdout"
+ 
+ #
+ # LogLevel: Control the number of messages logged to the error_log.
+@@ -219,7 +224,7 @@
+     # If you prefer a logfile with access, agent, and referer information
+     # (Combined Logfile Format) you can use the following directive.
+     #
+-    CustomLog "logs/access_log" combined
++    CustomLog "/dev/stdout" combined
+ </IfModule>
+ 
+ <IfModule alias_module>
+@@ -350,7 +355,12 @@
  # Defaults if commented: EnableMMAP On, EnableSendfile Off
  #
  #EnableMMAP off

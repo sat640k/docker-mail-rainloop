@@ -18,6 +18,7 @@ RUN yum -y --enablerepo="crb" install postfix dovecot dovecot-devel
 # install php
 RUN yum -y module install php:remi-7.4
 RUN yum -y install php php-common php-devel php-gd php-mbstring php-json php-curl php-xml
+RUN mkdir -p /run/php-fpm
 
 # install apache24
 RUN yum -y install httpd mod_ssl
@@ -39,10 +40,21 @@ RUN cp -pf /etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/ssl.conf.orig
 COPY ./conf/apache/ssl.conf.patch /etc/httpd/conf.d/
 RUN patch -u ssl.conf < ssl.conf.patch
 
-# generate fake cert
-RUN mkdir -p /etc/httpd/certs
-WORKDIR /etc/httpd/certs
-RUN openssl req -x509 -sha256 -nodes -days 398 -newkey rsa:2048 -keyout server.key -out server.crt -subj "/C=JP/ST=Tokyo/L=Tokyo/O=testmail/OU=testmail/CN=testmail.local"
+# generate fake cert for httpd
+RUN mkdir -p /etc/pki/tls/certs
+RUN mkdir -p /etc/pki/tls/private
+WORKDIR /etc/pki/tls
+RUN openssl req -x509 -sha256 -nodes -days 398 -newkey rsa:2048 -keyout private/localhost.key -out certs/localhost.crt -subj "/C=JP/ST=Tokyo/L=Tokyo/O=testmail/OU=testmail/CN=testmail.local"
+RUN mkdir -p /etc/dovecot/certs
+RUN mkdir -p /etc/dovecot/private
+
+# generate fake cert for dovecot
+RUN mkdir -p /etc/pki/dovecot/certs
+RUN mkdir -p /etc/pki/dovecot/private
+WORKDIR /etc/pki/dovecot/
+RUN openssl genrsa -out private/dovecot.pem 2048
+RUN openssl req -batch -new -key private/dovecot.pem -out certs/dovecot-csr.pem -subj "/C=JP/ST=Tokyo/L=Tokyo/O=testmail/OU=testmail/CN=testmail.local"
+RUN openssl x509 -req -in certs/dovecot-csr.pem -out certs/dovecot.pem -signkey private/dovecot.pem -days 398 -sha256
 
 # set config postfix
 COPY ./conf/postfix/main.cf /etc/postfix/
