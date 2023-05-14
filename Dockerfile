@@ -1,4 +1,4 @@
-FROM centos:7
+FROM rockylinux:9
 
 EXPOSE 25
 EXPOSE 80
@@ -9,15 +9,15 @@ RUN cp -pf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
 RUN yum -y update
 RUN yum -y update
-#RUN set -o pipefail && curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash
 RUN yum -y install epel-release
-RUN rpm -Uvh https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+RUN rpm -Uvh https://rpms.remirepo.net/enterprise/remi-release-9.rpm
 
 # install postfix and dovecot
-RUN yum -y install postfix dovecot dovecot-devel
+RUN yum -y --enablerepo="crb" install postfix dovecot dovecot-devel
 
 # install php
-RUN yum -y --enablerepo=remi,remi-php72 install php php-common php-devel php-gd php-mbstring php-json php-curl php-xml
+RUN yum -y module install php:remi-7.4
+RUN yum -y install php php-common php-devel php-gd php-mbstring php-json php-curl php-xml
 
 # install apache24
 RUN yum -y install httpd mod_ssl
@@ -30,21 +30,19 @@ RUN yum -y install patch
 
 # patch httpd setting
 WORKDIR /etc/httpd/conf/
-RUN cp -p /etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf.orig
+RUN cp -pf /etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf.orig
 COPY ./conf/apache/httpd.conf.patch /etc/httpd/conf/
 RUN patch -u httpd.conf < httpd.conf.patch
 # patch httpd ssl setting
 WORKDIR /etc/httpd/conf.d/
-RUN cp -p /etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/ssl.conf.orig
+RUN cp -pf /etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/ssl.conf.orig
 COPY ./conf/apache/ssl.conf.patch /etc/httpd/conf.d/
 RUN patch -u ssl.conf < ssl.conf.patch
 
-# 
+# generate fake cert
 RUN mkdir -p /etc/httpd/certs
 WORKDIR /etc/httpd/certs
 RUN openssl req -x509 -sha256 -nodes -days 398 -newkey rsa:2048 -keyout server.key -out server.crt -subj "/C=JP/ST=Tokyo/L=Tokyo/O=testmail/OU=testmail/CN=testmail.local"
-
-
 
 # set config postfix
 COPY ./conf/postfix/main.cf /etc/postfix/
